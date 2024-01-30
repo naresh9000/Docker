@@ -1,0 +1,15 @@
+FROM python:3-slim AS buildStage-1
+WORKDIR /app
+COPY requirements.txt .
+# Install dependencies into a virtual environment
+RUN python -m venv /venv && \
+    /venv/bin/pip install --no-cache-dir --upgrade pip && \
+    /venv/bin/pip install --no-cache-dir -r requirements.txt
+
+FROM gcr.io/distroless/python3
+COPY --from=buildStage-1 /venv /venv
+#adding /venv/bin to the beginning of the PATH variable and setting environment
+ENV PATH="/venv/bin:$PATH"
+WORKDIR /app
+COPY . .
+CMD [ "python", "app.py" ]

@@ -1,0 +1,30 @@
+FROM node:latest as builder
+WORKDIR /usr/src/app
+COPY package* ./
+COPY src/ src/
+RUN ["npm", "install"]# 
+
+FROM node:latest as linting
+WORKDIR /usr/src/app
+COPY --from=builder /usr/src/app/ .
+RUN ["npm", "lint"]# Lints Code 
+
+FROM newmitch/sonar-scanner:latest as sonarqube
+COPY --from=builder /usr/src/app/src /root/src
+# Gets Sonarqube Scanner from Dockerhub and runs it
+
+FROM node:latest as unit-tests
+WORKDIR /usr/src/app
+COPY --from=builder /usr/src/app/ .
+RUN ["npm", "test"]#Runs Unit Tests 
+
+FROM node:latest as access-tests
+WORKDIR /usr/src/app
+COPY --from=builder /usr/src/app/ .
+RUN ["npm", "access-tests"]# Runs Accessibility Tests
+
+FROM node:latest as serve
+WORKDIR /usr/src/app
+COPY --from=builder /usr/src/app/dest ./
+COPY --from=builder /usr/src/app/package* ./
+RUN ["npm", "start"]

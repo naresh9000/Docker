@@ -1,0 +1,19 @@
+FROM ubuntu:latest
+LABEL builtby="naresh"
+LABEL builderemail="naresh@gmail.com"
+ARG terra_ver='1.7.1'
+ARG packer_ver='1.10.0'
+RUN apt-get update -y \
+    && apt-get install -y unzip jq iputils-ping nginx \
+    && mkdir /app
+WORKDIR /app
+ADD https://releases.hashicorp.com/terraform/${terra_ver}/terraform_${terra_ver}_linux_amd64.zip /app/
+ADD https://releases.hashicorp.com/packer/${packer_ver}/packer_${packer_ver}_linux_amd64.zip /app/
+RUN unzip terraform_${terra_ver}_linux_amd64.zip \
+    && unzip packer_${packer_ver}_linux_amd64.zip \
+    && rm -f *.zip \
+    && ls -al \
+    && ./terraform version \
+    && ./packer version
+EXPOSE 80
+CMD [ "nginx", "-g", "daemon off;"]

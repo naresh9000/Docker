@@ -1,0 +1,12 @@
+FROM python:latest
+LABEL email = "sreeharshav@gmail.com"
+LABEL version="1.0"
+
+COPY app.py .
+RUN apt update \
+    && apt install -y jq unzip net-tools
+COPY requirements.txt .
+RUN pip install  -r requirements.txt
+EXPOSE 5555
+CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0", "--port=5555"]
+ENTRYPOINT [ "python3", "-m" , "flask", "run", "--host=0.0.0.0", "--port=5555"]
